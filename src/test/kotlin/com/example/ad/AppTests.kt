@@ -12,5 +12,4 @@ class AppTests {
         val a = 1
         assertThat(a).isEqualTo(1)
     }
-
 }

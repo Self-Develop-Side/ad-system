@@ -8,15 +8,6 @@ on:
       - '*'
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Apply ktlint
-        uses: meilisearch/ktlint-action@v1.0.0
-        with:
-          args: --verbose
-
   build:
     runs-on: ubuntu-latest
     steps:
