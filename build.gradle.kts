@@ -27,15 +27,17 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs += "-Xjsr305=strict"
-        jvmTarget = "17"
+tasks {
+    withType<Test> {
+        useJUnitPlatform()
     }
-}
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+    withType<KotlinCompile> {
+        kotlinOptions {
+            freeCompilerArgs += "-Xjsr305=strict"
+            jvmTarget = "17"
+        }
+    }
 
     ktlint {
         verbose.set(true)
