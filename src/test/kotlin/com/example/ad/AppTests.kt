@@ -9,7 +9,7 @@ class AppTests {
 
     @Test
     fun `CI 테스트`() {
-        val a = 1
+        val a = 12
         assertThat(a).isEqualTo(1)
     }
 }
