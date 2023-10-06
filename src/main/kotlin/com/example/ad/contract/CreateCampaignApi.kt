@@ -33,13 +33,13 @@ object ProblemDetails {
     fun forNullInput(): ProblemDetail {
         return ProblemDetail.forStatusAndDetail(
             HttpStatusCode.valueOf(HttpStatus.BAD_REQUEST.value()),
-            ErrorMessage.NULL_INPUT.value
+            ErrorMessage.NULL_INPUT.value,
         )
     }
 }
 
 enum class ErrorMessage(val value: String) {
-    NULL_INPUT("해당 입력 값은 NULL일 수 없습니다");
+    NULL_INPUT("해당 입력 값은 NULL일 수 없습니다"),
 }
 
 data class CreateCampaignRequest(

@@ -35,13 +35,13 @@ class CreateCampaignApiTests {
         val response = client.postForEntity(
             "http://localhost:${port}${CreateCampaignApi.PATH}",
             request,
-            String::class.java
+            String::class.java,
         )
 
         val errorResult = objectMapper.writeValueAsString(
             ProblemDetails.forNullInput().apply {
                 instance = URI(CreateCampaignApi.PATH)
-            }
+            },
         )
         assertThat(response.statusCode.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
         assertThat(response.body).isEqualTo(errorResult)
