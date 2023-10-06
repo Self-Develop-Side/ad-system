@@ -32,7 +32,9 @@ class CreateCampaignApiTests {
         val request: HttpEntity<String> = HttpEntity(null, headers)
 
         val response = client.postForEntity(
-            requestURI(), request, String::class.java,
+            requestURI(),
+            request,
+            String::class.java,
         )
 
         assertThat(response.statusCode.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
@@ -45,7 +47,9 @@ class CreateCampaignApiTests {
         val request = CreateCampaignRequest(value, value, value, value)
 
         val response = client.postForEntity(
-            requestURI(), request, String::class.java,
+            requestURI(),
+            request,
+            String::class.java,
         )
 
         assertThat(response.statusCode.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
