@@ -1,3 +1,5 @@
 spring:
   application:
     name: ad-system
+  web:
+    locale: ko_KR
