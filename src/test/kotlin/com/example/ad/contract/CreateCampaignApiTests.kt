@@ -1,6 +1,7 @@
 package com.example.ad.contract
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -38,12 +39,12 @@ class CreateCampaignApiTests {
         )
 
         assertThat(response.statusCode.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
-        assertThat(response.body).isEqualTo(expectedProblemDetail(ProblemDetails.forNullInput()))
+        assertThat(response.body).isEqualTo(expectedProblemDetail(ProblemDetails.forUnknownInput()))
     }
 
     @ParameterizedTest
     @EmptySource
-    fun `캠페인 생성에 필요한 입력 값이 공백인 경우 400 에러가 발생한다`(value: String) {
+    fun `캠페인 생성에 필요한 입력 값이 유효하지 않은 경우 400 에러가 발생한다`(value: String) {
         val request = CreateCampaignRequest(value, value, value, value)
 
         val response = client.postForEntity(
@@ -53,7 +54,22 @@ class CreateCampaignApiTests {
         )
 
         assertThat(response.statusCode.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
-        assertThat(response.body).isEqualTo(expectedProblemDetail(ProblemDetails.forEmptyInput()))
+        assertThatJson(response.body!!) {
+            node("detail").isEqualTo(ErrorMessage.NOT_VALID_INPUT.value)
+            node("instance").isEqualTo(PATH)
+            node("validationErrors").isArray.containsAll(expectedValidationErrors())
+        }
+    }
+
+    private fun expectedValidationErrors(): List<ValidationError> {
+        return listOf(
+            ValidationError("name", "공백일 수 없습니다"),
+            ValidationError("clientId", "공백일 수 없습니다"),
+            ValidationError("createdBy", "공백일 수 없습니다"),
+            ValidationError("campaignType", "공백일 수 없습니다"),
+            ValidationError("name", "크기가 25에서 50 사이여야 합니다"),
+            ValidationError("createdBy", "크기가 5에서 10 사이여야 합니다"),
+        )
     }
 
     private fun requestURI() = "http://localhost:$port$PATH"
