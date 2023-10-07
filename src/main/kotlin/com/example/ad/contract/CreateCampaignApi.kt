@@ -2,6 +2,7 @@ package com.example.ad.contract
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ProblemDetail
@@ -24,44 +25,57 @@ class CreateCampaignApi {
     fun handle(e: HttpMessageNotReadableException): ResponseEntity<ProblemDetail> {
         return ResponseEntity
             .badRequest()
-            .body(ProblemDetails.forNullInput())
+            .body(ProblemDetails.forUnknownInput())
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handle(e: MethodArgumentNotValidException): ResponseEntity<ProblemDetail> {
+        val validationErrors = e.bindingResult.fieldErrors.map {
+            ValidationError(it.field, it.defaultMessage)
+        }
         return ResponseEntity
             .badRequest()
-            .body(ProblemDetails.forEmptyInput())
+            .body(ProblemDetails.forNotValidInput(validationErrors))
     }
 }
 
 object ProblemDetails {
-    fun forNullInput(): ProblemDetail {
+    fun forUnknownInput(): ProblemDetail {
         return ProblemDetail.forStatusAndDetail(
             HttpStatusCode.valueOf(HttpStatus.BAD_REQUEST.value()),
-            ErrorMessage.NULL_INPUT.value,
+            ErrorMessage.UNKNOWN_INPUT.value,
         )
     }
 
-    fun forEmptyInput(): ProblemDetail {
-        return ProblemDetail.forStatusAndDetail(
+    fun forNotValidInput(validationErrors: List<ValidationError>): ProblemDetail {
+        val problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatusCode.valueOf(HttpStatus.BAD_REQUEST.value()),
-            ErrorMessage.EMPTY_INPUT.value,
-        )
+            ErrorMessage.NOT_VALID_INPUT.value,
+        ).also {
+            it.setProperty("validationErrors", validationErrors)
+        }
+        return problemDetail
     }
 }
 
+data class ValidationError(
+    val field: String,
+    val reason: String?,
+)
+
 enum class ErrorMessage(val value: String) {
-    NULL_INPUT("해당 입력 값은 NULL일 수 없습니다"),
-    EMPTY_INPUT("해당 입력 값은 공백일 수 없습니다"),
+    UNKNOWN_INPUT("처리 할 수 없는 입력 값입니다"),
+    NOT_VALID_INPUT("입력 값이 유효하지 않습니다"),
 }
 
 data class CreateCampaignRequest(
     @field:NotBlank
     val clientId: String,
     @field:NotBlank
+    @field:Size(min = 25, max = 50)
     val name: String,
     @field:NotBlank
+    @field:Size(min = 5, max = 10)
     val createdBy: String,
     @field:NotBlank
     val campaignType: String,

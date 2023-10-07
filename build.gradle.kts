@@ -24,6 +24,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
