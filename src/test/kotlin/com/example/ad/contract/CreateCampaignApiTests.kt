@@ -56,14 +56,18 @@ class CreateCampaignApiTests {
         assertThat(response.body).isEqualTo(expectedProblemDetail(ProblemDetails.forEmptyInput()))
     }
 
-    private fun requestURI() = "http://localhost:${port}${CreateCampaignApi.PATH}"
+    private fun requestURI() = "http://localhost:$port$PATH"
 
     private fun expectedProblemDetail(problemDetail: ProblemDetail): String {
         val expected = objectMapper.writeValueAsString(
             problemDetail.apply {
-                instance = URI(CreateCampaignApi.PATH)
+                instance = URI(PATH)
             },
         )
         return expected
+    }
+
+    companion object {
+        private const val PATH = "/api/v1/campaigns/contract"
     }
 }

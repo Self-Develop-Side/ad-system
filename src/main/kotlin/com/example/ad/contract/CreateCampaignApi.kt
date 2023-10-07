@@ -33,10 +33,6 @@ class CreateCampaignApi {
             .badRequest()
             .body(ProblemDetails.forEmptyInput())
     }
-
-    companion object {
-        const val PATH = "/api/v1/campaigns/contract"
-    }
 }
 
 object ProblemDetails {
