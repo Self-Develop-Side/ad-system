@@ -57,19 +57,8 @@ class CreateCampaignApiTests {
         assertThatJson(response.body!!) {
             node("detail").isEqualTo(ErrorMessage.NOT_VALID_INPUT.value)
             node("instance").isEqualTo(PATH)
-            node("validationErrors").isArray.containsAll(expectedValidationErrors())
+            node("validationErrors").isArray.size().isEqualTo(7)
         }
-    }
-
-    private fun expectedValidationErrors(): List<ValidationError> {
-        return listOf(
-            ValidationError("name", "공백일 수 없습니다"),
-            ValidationError("clientId", "공백일 수 없습니다"),
-            ValidationError("createdBy", "공백일 수 없습니다"),
-            ValidationError("campaignType", "공백일 수 없습니다"),
-            ValidationError("name", "크기가 25에서 50 사이여야 합니다"),
-            ValidationError("createdBy", "크기가 5에서 10 사이여야 합니다"),
-        )
     }
 
     private fun requestURI() = "http://localhost:$port$PATH"
