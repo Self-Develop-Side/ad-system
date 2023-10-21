@@ -104,6 +104,32 @@ class CreateCampaignApiTests {
         assertThat(response.body).isEqualTo(expectedProblemDetail(ProblemDetails.forNotValidInput(listOf(ValidationErrors.invalidClientId()))))
     }
 
+    @Test
+    fun `캠페인을 생성하고 생성된 캠페인의 값을 200 응답과 함께 반환한다`() {
+        val faker = Faker()
+        val request = CreateCampaignRequest(
+            clientId = UUID.randomUUID().toString(),
+            name = faker.lorem().characters(25, 50),
+            createdBy = faker.lorem().characters(5, 10),
+            campaignType = CampaignType.PAID.value,
+        )
+
+        val response = client.postForEntity(
+            requestURI(),
+            request,
+            CampaignResponse::class.java,
+        )
+
+        assertThat(response.statusCode.value()).isEqualTo(HttpStatus.OK.value())
+        assertThatJson(response.body!!) {
+            node("clientId").isEqualTo(request.clientId)
+            node("name").isEqualTo(request.name)
+            node("createdBy").isEqualTo(request.createdBy)
+            node("campaignType").isEqualTo(CampaignType.PAID.value)
+            node("status").isEqualTo(CampaignStatus.SWITCHED_OFF.toString())
+        }
+    }
+
     private fun requestURI() = "http://localhost:$port$PATH"
 
     private fun expectedProblemDetail(problemDetail: ProblemDetail): String {
