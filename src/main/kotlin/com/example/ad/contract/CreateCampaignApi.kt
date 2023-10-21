@@ -1,10 +1,6 @@
 package com.example.ad.contract
 
 import jakarta.validation.Valid
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Size
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -46,71 +42,3 @@ class CreateCampaignApi {
             .body(ProblemDetails.forNotValidInput(listOf(e.validationError)))
     }
 }
-
-object ProblemDetails {
-    fun forUnknownInput(): ProblemDetail {
-        return ProblemDetail.forStatusAndDetail(
-            HttpStatusCode.valueOf(HttpStatus.BAD_REQUEST.value()),
-            ErrorMessage.UNKNOWN_INPUT.value,
-        )
-    }
-
-    fun forNotValidInput(validationErrors: List<ValidationError>): ProblemDetail {
-        val problemDetail = ProblemDetail.forStatusAndDetail(
-            HttpStatusCode.valueOf(HttpStatus.BAD_REQUEST.value()),
-            ErrorMessage.NOT_VALID_INPUT.value,
-        ).also {
-            it.setProperty("validationErrors", validationErrors)
-        }
-        return problemDetail
-    }
-}
-
-object ValidationErrors {
-    fun invalidCampaignType(): ValidationError {
-        return ValidationError(
-            "campaignType",
-            "캠페인 타입이 올바르지 않습니다",
-        )
-    }
-}
-
-data class ValidationError(
-    val field: String,
-    val reason: String?,
-)
-
-enum class ErrorMessage(val value: String) {
-    UNKNOWN_INPUT("처리 할 수 없는 입력 값입니다"),
-    NOT_VALID_INPUT("입력 값이 유효하지 않습니다"),
-}
-
-enum class CampaignType(val value: String) {
-    PAID("유료"),
-    IN_HOUSE("내부"),
-    ;
-
-    companion object {
-        fun findByCampaignType(value: String): CampaignType {
-            return entries.find { it.value == value }
-                ?: throw InvalidCampaignTypeException()
-        }
-    }
-}
-
-data class CreateCampaignRequest(
-    @field:NotBlank
-    val clientId: String,
-    @field:NotBlank
-    @field:Size(min = 25, max = 50)
-    val name: String,
-    @field:NotBlank
-    @field:Size(min = 5, max = 10)
-    val createdBy: String,
-    @field:NotBlank
-    val campaignType: String,
-)
-
-sealed class ValidationException(val validationError: ValidationError) : RuntimeException()
-
-class InvalidCampaignTypeException : ValidationException(ValidationErrors.invalidCampaignType())
