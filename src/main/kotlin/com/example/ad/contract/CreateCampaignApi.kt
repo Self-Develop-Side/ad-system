@@ -1,8 +1,5 @@
 package com.example.ad.contract
 
-import jakarta.validation.Constraint
-import jakarta.validation.ConstraintValidator
-import jakarta.validation.ConstraintValidatorContext
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -16,13 +13,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import kotlin.reflect.KClass
 
 @RestController
 class CreateCampaignApi {
 
     @PostMapping("/api/v1/campaigns/contract")
     fun create(@RequestBody @Valid request: CreateCampaignRequest) {
+        val campaignType = CampaignType.findByCampaignType(request.campaignType)
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
@@ -40,6 +37,13 @@ class CreateCampaignApi {
         return ResponseEntity
             .badRequest()
             .body(ProblemDetails.forNotValidInput(validationErrors))
+    }
+
+    @ExceptionHandler(ValidationException::class)
+    fun handle(e: ValidationException): ResponseEntity<ProblemDetail> {
+        return ResponseEntity
+            .badRequest()
+            .body(ProblemDetails.forNotValidInput(listOf(e.validationError)))
     }
 }
 
@@ -62,6 +66,15 @@ object ProblemDetails {
     }
 }
 
+object ValidationErrors {
+    fun invalidCampaignType(): ValidationError {
+        return ValidationError(
+            "campaignType",
+            "캠페인 타입이 올바르지 않습니다",
+        )
+    }
+}
+
 data class ValidationError(
     val field: String,
     val reason: String?,
@@ -77,21 +90,12 @@ enum class CampaignType(val value: String) {
     IN_HOUSE("내부"),
     ;
 
-    fun isValid(value: String): Boolean = this.value == value
-}
-
-@Target(AnnotationTarget.FIELD)
-@Retention(AnnotationRetention.RUNTIME)
-@Constraint(validatedBy = [CampaignTypeValidator::class])
-annotation class CampaignTypeConstraint(
-    val message: String = "캠페인 타입이 유효하지 않습니다",
-    val groups: Array<KClass<*>> = [],
-    val payload: Array<KClass<out Any>> = [],
-)
-
-class CampaignTypeValidator : ConstraintValidator<CampaignTypeConstraint, String> {
-    override fun isValid(value: String, context: ConstraintValidatorContext): Boolean =
-        CampaignType.entries.any { it.isValid(value) }
+    companion object {
+        fun findByCampaignType(value: String): CampaignType {
+            return entries.find { it.value == value }
+                ?: throw InvalidCampaignTypeException()
+        }
+    }
 }
 
 data class CreateCampaignRequest(
@@ -104,6 +108,9 @@ data class CreateCampaignRequest(
     @field:Size(min = 5, max = 10)
     val createdBy: String,
     @field:NotBlank
-    @field:CampaignTypeConstraint
     val campaignType: String,
 )
+
+sealed class ValidationException(val validationError: ValidationError) : RuntimeException()
+
+class InvalidCampaignTypeException : ValidationException(ValidationErrors.invalidCampaignType())

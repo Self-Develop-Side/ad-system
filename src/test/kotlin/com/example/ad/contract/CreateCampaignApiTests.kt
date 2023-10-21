@@ -1,6 +1,7 @@
 package com.example.ad.contract
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.javafaker.Faker
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -52,7 +53,7 @@ class CreateCampaignApiTests {
             request,
             String::class.java,
         )
-        val invalidationErrorCount = 7
+        val invalidationErrorCount = 6
 
         assertThat(response.statusCode.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
         assertThatJson(response.body!!) {
@@ -60,6 +61,26 @@ class CreateCampaignApiTests {
             node("instance").isEqualTo(PATH)
             node("validationErrors").isArray.size().isEqualTo(invalidationErrorCount)
         }
+    }
+
+    @Test
+    fun `캠페인 타입이 올바르지 않은 경우 400 에러가 발생한다`() {
+        val faker = Faker()
+        val request = CreateCampaignRequest(
+            clientId = faker.idNumber().valid(),
+            name = faker.lorem().characters(25, 50),
+            createdBy = faker.lorem().characters(5, 10),
+            campaignType = faker.lorem().word(),
+        )
+
+        val response = client.postForEntity(
+            requestURI(),
+            request,
+            String::class.java,
+        )
+
+        assertThat(response.statusCode.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
+        assertThat(response.body).isEqualTo(expectedProblemDetail(ProblemDetails.forNotValidInput(listOf(ValidationErrors.invalidCampaignType()))))
     }
 
     private fun requestURI() = "http://localhost:$port$PATH"
