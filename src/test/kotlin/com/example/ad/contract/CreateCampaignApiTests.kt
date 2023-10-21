@@ -29,6 +29,8 @@ class CreateCampaignApiTests {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
+    private val faker = Faker()
+
     @Test
     fun `캠페인 생성에 필요한 입력 값이 NULL인 경우 400 에러가 발생한다`() {
         val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
@@ -66,7 +68,6 @@ class CreateCampaignApiTests {
 
     @Test
     fun `캠페인 타입이 올바르지 않은 경우 400 에러가 발생한다`() {
-        val faker = Faker()
         val request = CreateCampaignRequest(
             clientId = UUID.randomUUID().toString(),
             name = faker.lorem().characters(25, 50),
@@ -86,7 +87,6 @@ class CreateCampaignApiTests {
 
     @Test
     fun `클라이언트 식별자가 올바르지 않은 경우 400 에러가 발생한다`() {
-        val faker = Faker()
         val request = CreateCampaignRequest(
             clientId = faker.idNumber().valid(),
             name = faker.lorem().characters(25, 50),
@@ -106,7 +106,6 @@ class CreateCampaignApiTests {
 
     @Test
     fun `캠페인을 생성하고 생성된 캠페인의 값을 200 응답과 함께 반환한다`() {
-        val faker = Faker()
         val request = CreateCampaignRequest(
             clientId = UUID.randomUUID().toString(),
             name = faker.lorem().characters(25, 50),
