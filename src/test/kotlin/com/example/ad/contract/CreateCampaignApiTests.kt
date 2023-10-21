@@ -52,12 +52,13 @@ class CreateCampaignApiTests {
             request,
             String::class.java,
         )
+        val invalidationErrorCount = 7
 
         assertThat(response.statusCode.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
         assertThatJson(response.body!!) {
             node("detail").isEqualTo(ErrorMessage.NOT_VALID_INPUT.value)
             node("instance").isEqualTo(PATH)
-            node("validationErrors").isArray.size().isEqualTo(7)
+            node("validationErrors").isArray.size().isEqualTo(invalidationErrorCount)
         }
     }
 
