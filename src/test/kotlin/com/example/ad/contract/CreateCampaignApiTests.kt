@@ -14,6 +14,7 @@ import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.*
 import org.springframework.test.context.ActiveProfiles
 import java.net.URI
+import java.util.UUID
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -67,7 +68,7 @@ class CreateCampaignApiTests {
     fun `캠페인 타입이 올바르지 않은 경우 400 에러가 발생한다`() {
         val faker = Faker()
         val request = CreateCampaignRequest(
-            clientId = faker.idNumber().valid(),
+            clientId = UUID.randomUUID().toString(),
             name = faker.lorem().characters(25, 50),
             createdBy = faker.lorem().characters(5, 10),
             campaignType = faker.lorem().word(),
@@ -81,6 +82,26 @@ class CreateCampaignApiTests {
 
         assertThat(response.statusCode.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
         assertThat(response.body).isEqualTo(expectedProblemDetail(ProblemDetails.forNotValidInput(listOf(ValidationErrors.invalidCampaignType()))))
+    }
+
+    @Test
+    fun `클라이언트 식별자가 올바르지 않은 경우 400 에러가 발생한다`() {
+        val faker = Faker()
+        val request = CreateCampaignRequest(
+            clientId = faker.idNumber().valid(),
+            name = faker.lorem().characters(25, 50),
+            createdBy = faker.lorem().characters(5, 10),
+            campaignType = CampaignType.PAID.value,
+        )
+
+        val response = client.postForEntity(
+            requestURI(),
+            request,
+            String::class.java,
+        )
+
+        assertThat(response.statusCode.value()).isEqualTo(HttpStatus.BAD_REQUEST.value())
+        assertThat(response.body).isEqualTo(expectedProblemDetail(ProblemDetails.forNotValidInput(listOf(ValidationErrors.invalidClientId()))))
     }
 
     private fun requestURI() = "http://localhost:$port$PATH"
