@@ -8,4 +8,5 @@ class Campaign(
     val name: String,
     val createdBy: String,
     val campaignType: CampaignType,
+    val status: CampaignStatus = CampaignStatus.SWITCHED_OFF,
 )

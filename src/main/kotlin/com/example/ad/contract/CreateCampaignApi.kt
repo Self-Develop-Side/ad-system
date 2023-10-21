@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-class CreateCampaignApi {
+class CreateCampaignApi(
+    private val campaignRepository: CampaignRepository,
+) {
 
     @PostMapping("/api/v1/campaigns/contract")
-    fun create(@RequestBody @Valid request: CreateCampaignRequest) {
+    fun create(@RequestBody @Valid request: CreateCampaignRequest): ResponseEntity<CampaignResponse> {
         val campaign = Campaign(
             id = UUID.randomUUID(),
             clientId = ClientId(request.clientId),
@@ -23,6 +25,18 @@ class CreateCampaignApi {
             createdBy = request.createdBy,
             campaignType = CampaignType.findByCampaignType(request.campaignType),
         )
+        campaignRepository.save(campaign)
+        return ResponseEntity.ok()
+            .body(
+                CampaignResponse(
+                    id = campaign.id.toString(),
+                    clientId = campaign.clientId.value.toString(),
+                    name = campaign.name,
+                    createdBy = campaign.createdBy,
+                    campaignType = campaign.campaignType.value,
+                    status = campaign.status.toString(),
+                ),
+            )
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
@@ -50,13 +64,11 @@ class CreateCampaignApi {
     }
 }
 
-class ClientId(value: String) {
-    private val value: UUID
-
-    init {
-        this.value = this.runCatching { UUID.fromString(value) }
-            .getOrElse { throw InvalidClientIdException() }
-    }
-}
-
-class InvalidClientIdException : ValidationException(ValidationErrors.invalidClientId())
+data class CampaignResponse(
+    val id: String,
+    val clientId: String,
+    val name: String,
+    val createdBy: String,
+    val campaignType: String,
+    val status: String,
+)
