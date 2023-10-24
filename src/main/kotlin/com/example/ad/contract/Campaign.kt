@@ -1,6 +1,6 @@
 package com.example.ad.contract
 
-import java.util.*
+import java.util.UUID
 
 class Campaign(
     val id: UUID,
