@@ -5,8 +5,16 @@ import java.util.*
 
 @Repository
 class InMemoryCampaignRepository : CampaignRepository {
-    override fun save(campaign: Campaign) {
-        storage[campaign.id] = campaign
+    override fun save(campaign: Campaign): Campaign {
+        val entity = Campaign(
+                id = UUID.randomUUID(),
+                clientId = campaign.clientId,
+                name = campaign.name,
+                createdBy = campaign.createdBy,
+                campaignType = campaign.campaignType
+        )
+        storage[entity.id] = entity
+        return entity
     }
 
     companion object {

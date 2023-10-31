@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
 
 @RestController
 class CreateCampaignApi(
@@ -19,24 +18,14 @@ class CreateCampaignApi(
     @PostMapping("/api/v1/campaigns/contract")
     fun create(@RequestBody @Valid request: CreateCampaignRequest): ResponseEntity<CampaignResponse> {
         val campaign = Campaign(
-            id = UUID.randomUUID(),
             clientId = ClientId(request.clientId),
             name = request.name,
             createdBy = request.createdBy,
             campaignType = CampaignType.findByCampaignType(request.campaignType),
         )
-        campaignRepository.save(campaign)
+        val savedCampaign = campaignRepository.save(campaign)
         return ResponseEntity.ok()
-            .body(
-                CampaignResponse(
-                    id = campaign.id.toString(),
-                    clientId = campaign.clientId.value.toString(),
-                    name = campaign.name,
-                    createdBy = campaign.createdBy,
-                    campaignType = campaign.campaignType.value,
-                    status = campaign.status.toString(),
-                ),
-            )
+            .body(CampaignResponse.of(savedCampaign))
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
@@ -71,4 +60,17 @@ data class CampaignResponse(
     val createdBy: String,
     val campaignType: String,
     val status: String,
-)
+){
+    companion object {
+        fun of(campaign: Campaign): CampaignResponse {
+            return CampaignResponse(
+                id = campaign.id.toString(),
+                clientId = campaign.clientId.value.toString(),
+                name = campaign.name,
+                createdBy = campaign.createdBy,
+                campaignType = campaign.campaignType.value,
+                status = campaign.status.toString(),
+            )
+        }
+    }
+}
