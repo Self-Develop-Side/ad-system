@@ -24,18 +24,9 @@ class CreateCampaignApi(
             createdBy = request.createdBy,
             campaignType = CampaignType.findByCampaignType(request.campaignType),
         )
-        campaignRepository.save(campaign)
+        val save = campaignRepository.save(campaign)
         return ResponseEntity.ok()
-            .body(
-                CampaignResponse(
-                    id = campaign.id.toString(),
-                    clientId = campaign.clientId.value.toString(),
-                    name = campaign.name,
-                    createdBy = campaign.createdBy,
-                    campaignType = campaign.campaignType.value,
-                    status = campaign.status.toString(),
-                ),
-            )
+            .body(CampaignResponse.of(save))
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
@@ -70,4 +61,17 @@ data class CampaignResponse(
     val createdBy: String,
     val campaignType: String,
     val status: String,
-)
+){
+    companion object {
+        fun of(campaign: Campaign): CampaignResponse {
+            return CampaignResponse(
+                id = campaign.id.toString(),
+                clientId = campaign.clientId.value.toString(),
+                name = campaign.name,
+                createdBy = campaign.createdBy,
+                campaignType = campaign.campaignType.value,
+                status = campaign.status.toString(),
+            )
+        }
+    }
+}
