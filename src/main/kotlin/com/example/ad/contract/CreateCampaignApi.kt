@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
 
 @RestController
 class CreateCampaignApi(
@@ -24,9 +23,9 @@ class CreateCampaignApi(
             createdBy = request.createdBy,
             campaignType = CampaignType.findByCampaignType(request.campaignType),
         )
-        val save = campaignRepository.save(campaign)
+        val savedCampaign = campaignRepository.save(campaign)
         return ResponseEntity.ok()
-            .body(CampaignResponse.of(save))
+            .body(CampaignResponse.of(savedCampaign))
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
