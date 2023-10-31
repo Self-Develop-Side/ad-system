@@ -19,7 +19,6 @@ class CreateCampaignApi(
     @PostMapping("/api/v1/campaigns/contract")
     fun create(@RequestBody @Valid request: CreateCampaignRequest): ResponseEntity<CampaignResponse> {
         val campaign = Campaign(
-            id = UUID.randomUUID(),
             clientId = ClientId(request.clientId),
             name = request.name,
             createdBy = request.createdBy,
